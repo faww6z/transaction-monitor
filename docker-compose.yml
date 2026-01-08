@@ -1,0 +1,26 @@
+services:
+  db:
+    image: postgres:16
+    container_name: txn-postgres
+    environment:
+      POSTGRES_DB: txn_monitor
+      POSTGRES_USER: appuser
+      POSTGRES_PASSWORD: apppass
+    volumes:
+      - txn_pgdata:/var/lib/postgresql/data
+
+  app:
+    build: .
+    container_name: txn-app
+    depends_on:
+      - db
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/txn_monitor
+      SPRING_DATASOURCE_USERNAME: appuser
+      SPRING_DATASOURCE_PASSWORD: apppass
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+    ports:
+      - "80:8080"
+
+volumes:
+  txn_pgdata:

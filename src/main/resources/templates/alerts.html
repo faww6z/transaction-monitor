@@ -1,0 +1,89 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>Alerts</title>
+    <style>
+        body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial; padding: 24px; }
+        table { border-collapse: collapse; width: 100%; }
+        th, td { border-bottom: 1px solid #eee; text-align: left; padding: 10px; vertical-align: top; }
+        a { text-decoration: none; }
+        .tabs { display: flex; gap: 10px; margin: 12px 0 18px; flex-wrap: wrap; }
+        .tab { padding: 8px 12px; border: 1px solid #ddd; border-radius: 999px; color: #111; }
+        .tab.active { border-color: #111; font-weight: 600; }
+        .pill { padding: 4px 10px; border-radius: 999px; font-size: 12px; border: 1px solid #ddd; display: inline-block; }
+        .pill.open { border-color: #999; }
+        .pill.inprogress { border-color: #666; }
+        .pill.resolved { border-color: #333; }
+
+        .risk { padding: 4px 10px; border-radius: 999px; font-size: 12px; border: 1px solid #ddd; display: inline-block; }
+        .risk.low { border-color: #aaa; }
+        .risk.medium { border-color: #777; }
+        .risk.high { border-color: #111; font-weight: 600; }
+
+        .muted { color: #666; font-size: 12px; }
+    </style>
+</head>
+<body>
+<h1>Alerts</h1>
+
+<div class="tabs">
+    <a class="tab" th:classappend="${selectedStatus} == null ? ' active' : ''" href="/alerts">All</a>
+    <a class="tab" th:each="s : ${statuses}"
+       th:classappend="${selectedStatus} == ${s} ? ' active' : ''"
+       th:href="@{'/alerts?status=' + ${s}}"
+       th:text="${s}">OPEN</a>
+</div>
+
+<table>
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Status</th>
+        <th>Risk</th>
+        <th>Score</th>
+        <th>Triggered</th>
+        <th>Created</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="a : ${alerts}">
+        <td>
+            <a th:href="@{'/alerts/' + ${a.id}}" th:text="${a.id}">1</a>
+        </td>
+
+        <td>
+        <span class="pill"
+              th:classappend="${#strings.toLowerCase(a.status.name())}"
+              th:text="${a.status}">OPEN</span>
+        </td>
+
+        <td>
+        <span class="risk"
+              th:classappend="${#strings.toLowerCase(a.riskScore.riskLevel.name())}"
+              th:text="${a.riskScore.riskLevel}">HIGH</span>
+        </td>
+
+        <td th:text="${a.riskScore.score}">100</td>
+
+        <td>
+            <div>
+    <span th:each="r : ${#strings.arraySplit(a.riskScore.triggeredRules, ',')}"
+          class="pill"
+          th:text="${r}"
+          style="margin-right:6px; margin-bottom:4px; display:inline-block;">
+      RULE
+    </span>
+            </div>
+            <div class="muted">Click ID to investigate</div>
+        </td>
+
+        <td>
+            <div th:text="${#temporals.format(a.createdAt, 'yyyy-MM-dd HH:mm:ss')}">time</div>
+            <div class="muted">UTC</div>
+        </td>
+    </tr>
+    </tbody>
+</table>
+</body>
+</html>
