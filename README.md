@@ -1,3 +1,9 @@
+<img width="1920" height="991" alt="image" src="https://github.com/user-attachments/assets/4f7b9022-fb99-46ad-a675-4c08fda8f84a" />
+
+
+<img width="1920" height="993" alt="image" src="https://github.com/user-attachments/assets/5fa09319-9dae-4fcf-9579-ce4c2e17bd90" />
+
+
 ```markdown
 # Transaction Monitoring & Risk Scoring System
 
