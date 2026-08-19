@@ -2,13 +2,15 @@ package com.fawwaz.transactionmonitor.risk;
 
 import com.fawwaz.transactionmonitor.domain.Transaction;
 
+import java.math.BigDecimal;
+
 public class AmountRule implements RiskRule {
 
-    private final double threshold;
+    private final BigDecimal threshold;
     private final int points;
 
     public AmountRule(double threshold, int points) {
-        this.threshold = threshold;
+        this.threshold = BigDecimal.valueOf(threshold);
         this.points = points;
     }
 
@@ -17,6 +19,7 @@ public class AmountRule implements RiskRule {
 
     @Override
     public int score(Transaction txn) {
-        return txn.getAmount() >= threshold ? points : 0;
+        // triggered when amount >= threshold (inclusive)
+        return txn.getAmount().compareTo(threshold) >= 0 ? points : 0;
     }
 }

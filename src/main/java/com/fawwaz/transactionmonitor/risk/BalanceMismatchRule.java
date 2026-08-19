@@ -2,13 +2,15 @@ package com.fawwaz.transactionmonitor.risk;
 
 import com.fawwaz.transactionmonitor.domain.Transaction;
 
+import java.math.BigDecimal;
+
 public class BalanceMismatchRule implements RiskRule {
 
-    private final double tolerance;
+    private final BigDecimal tolerance;
     private final int points;
 
     public BalanceMismatchRule(double tolerance, int points) {
-        this.tolerance = tolerance;
+        this.tolerance = BigDecimal.valueOf(tolerance);
         this.points = points;
     }
 
@@ -17,13 +19,19 @@ public class BalanceMismatchRule implements RiskRule {
 
     @Override
     public int score(Transaction txn) {
-        double expectedNewOrig = txn.getOldBalanceOrig() - txn.getAmount();
-        boolean mismatchOrig = Math.abs(txn.getNewBalanceOrig() - expectedNewOrig) > tolerance;
+        // Origin: expectedNewOrig = old - amount
+        BigDecimal expectedNewOrig = txn.getOldBalanceOrig().subtract(txn.getAmount());
+        boolean mismatchOrig = exceedsTolerance(txn.getNewBalanceOrig(), expectedNewOrig);
 
         // Destination: expectedNewDest = old + amount
-        double expectedNewDest = txn.getOldBalanceDest() + txn.getAmount();
-        boolean mismatchDest = Math.abs(txn.getNewBalanceDest() - expectedNewDest) > tolerance;
+        BigDecimal expectedNewDest = txn.getOldBalanceDest().add(txn.getAmount());
+        boolean mismatchDest = exceedsTolerance(txn.getNewBalanceDest(), expectedNewDest);
 
         return (mismatchOrig || mismatchDest) ? points : 0;
+    }
+
+    /** True when |actual - expected| is strictly greater than the tolerance. */
+    private boolean exceedsTolerance(BigDecimal actual, BigDecimal expected) {
+        return actual.subtract(expected).abs().compareTo(tolerance) > 0;
     }
 }
