@@ -1,11 +1,14 @@
 <!doctype html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8" />
     <title>Alert Detail</title>
     <style>
-        body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial; padding: 24px; max-width: 900px; }
-        a { text-decoration: none; }
+        body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial; padding: 24px; max-width: 900px; margin: 0 auto; }
+        a { text-decoration: none; color: #111; }
+        .nav { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; }
+        .nav .spacer { flex: 1; }
+        .nav a { padding: 6px 10px; border-radius: 8px; }
         .card { border: 1px solid #eee; border-radius: 12px; padding: 16px; margin: 12px 0; }
         .row { display: flex; gap: 16px; flex-wrap: wrap; }
         .kv { min-width: 260px; }
@@ -14,10 +17,22 @@
         select, textarea, button { font-size: 14px; padding: 8px; }
         textarea { width: 100%; min-height: 90px; }
         button { cursor: pointer; }
+        table { border-collapse: collapse; width: 100%; }
+        th, td { border-bottom: 1px solid #eee; text-align: left; padding: 8px 10px; vertical-align: top; }
+        .muted { color: #666; font-size: 12px; }
+        .pill { padding: 4px 10px; border-radius: 999px; font-size: 12px; border: 1px solid #ddd; display: inline-block; }
     </style>
 </head>
 <body>
-<p><a href="/alerts">← Back to Alerts</a></p>
+<div class="nav">
+    <a href="/">Dashboard</a>
+    <a href="/alerts">← Back to Alerts</a>
+    <div class="spacer"></div>
+    <span class="muted">Signed in as <b sec:authentication="name">analyst</b></span>
+    <form th:action="@{/logout}" method="post" style="margin:0;">
+        <button type="submit">Log out</button>
+    </form>
+</div>
 
 <h1>Alert <span th:text="${alert.id}">1</span></h1>
 
@@ -82,6 +97,27 @@
 
         <button type="submit">Save</button>
     </form>
+</div>
+
+<div class="card">
+    <h3>Audit trail</h3>
+    <table>
+        <thead>
+        <tr><th>When</th><th>Change</th><th>Actor</th><th>Note</th></tr>
+        </thead>
+        <tbody>
+        <tr th:each="e : ${events}">
+            <td th:text="${#temporals.format(e.createdAt, 'yyyy-MM-dd HH:mm:ss')}">time</td>
+            <td>
+                <span th:text="${e.fromStatus} ?: '—'">OPEN</span>
+                → <span th:text="${e.toStatus}">RESOLVED</span>
+            </td>
+            <td th:text="${e.actor}">analyst</td>
+            <td th:text="${e.note}"></td>
+        </tr>
+        <tr th:if="${events.isEmpty()}"><td colspan="4" class="muted">No history.</td></tr>
+        </tbody>
+    </table>
 </div>
 </body>
 </html>
