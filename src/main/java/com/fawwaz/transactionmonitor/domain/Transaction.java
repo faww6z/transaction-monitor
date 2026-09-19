@@ -2,9 +2,10 @@ package com.fawwaz.transactionmonitor.domain;
 
 import com.fawwaz.transactionmonitor.domain.enums.TransactionType;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PositiveOrZero;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 
 @Entity
@@ -19,20 +20,30 @@ public class Transaction {
     @Enumerated(EnumType.STRING)
     private TransactionType type;
 
-    @Min(0)
-    private double amount;
+    @NotNull
+    @PositiveOrZero
+    @Column(nullable = false, precision = 19, scale = 2)
+    private BigDecimal amount;
 
-    @Min(0)
-    private double oldBalanceOrig;
+    @NotNull
+    @PositiveOrZero
+    @Column(nullable = false, precision = 19, scale = 2)
+    private BigDecimal oldBalanceOrig;
 
-    @Min(0)
-    private double newBalanceOrig;
+    @NotNull
+    @PositiveOrZero
+    @Column(nullable = false, precision = 19, scale = 2)
+    private BigDecimal newBalanceOrig;
 
-    @Min(0)
-    private double oldBalanceDest;
+    @NotNull
+    @PositiveOrZero
+    @Column(nullable = false, precision = 19, scale = 2)
+    private BigDecimal oldBalanceDest;
 
-    @Min(0)
-    private double newBalanceDest;
+    @NotNull
+    @PositiveOrZero
+    @Column(nullable = false, precision = 19, scale = 2)
+    private BigDecimal newBalanceDest;
 
     @Column(nullable = false, updatable = false)
     private Instant createdAt = Instant.now();
@@ -44,20 +55,20 @@ public class Transaction {
     public TransactionType getType() { return type; }
     public void setType(TransactionType type) { this.type = type; }
 
-    public double getAmount() { return amount; }
-    public void setAmount(double amount) { this.amount = amount; }
+    public BigDecimal getAmount() { return amount; }
+    public void setAmount(BigDecimal amount) { this.amount = amount; }
 
-    public double getOldBalanceOrig() { return oldBalanceOrig; }
-    public void setOldBalanceOrig(double oldBalanceOrig) { this.oldBalanceOrig = oldBalanceOrig; }
+    public BigDecimal getOldBalanceOrig() { return oldBalanceOrig; }
+    public void setOldBalanceOrig(BigDecimal oldBalanceOrig) { this.oldBalanceOrig = oldBalanceOrig; }
 
-    public double getNewBalanceOrig() { return newBalanceOrig; }
-    public void setNewBalanceOrig(double newBalanceOrig) { this.newBalanceOrig = newBalanceOrig; }
+    public BigDecimal getNewBalanceOrig() { return newBalanceOrig; }
+    public void setNewBalanceOrig(BigDecimal newBalanceOrig) { this.newBalanceOrig = newBalanceOrig; }
 
-    public double getOldBalanceDest() { return oldBalanceDest; }
-    public void setOldBalanceDest(double oldBalanceDest) { this.oldBalanceDest = oldBalanceDest; }
+    public BigDecimal getOldBalanceDest() { return oldBalanceDest; }
+    public void setOldBalanceDest(BigDecimal oldBalanceDest) { this.oldBalanceDest = oldBalanceDest; }
 
-    public double getNewBalanceDest() { return newBalanceDest; }
-    public void setNewBalanceDest(double newBalanceDest) { this.newBalanceDest = newBalanceDest; }
+    public BigDecimal getNewBalanceDest() { return newBalanceDest; }
+    public void setNewBalanceDest(BigDecimal newBalanceDest) { this.newBalanceDest = newBalanceDest; }
 
     public Instant getCreatedAt() { return createdAt; }
 }

@@ -18,7 +18,8 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/txn_monitor
       SPRING_DATASOURCE_USERNAME: appuser
       SPRING_DATASOURCE_PASSWORD: apppass
-      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      # Flyway owns the schema; Hibernate must not create or alter tables.
+      SPRING_JPA_HIBERNATE_DDL_AUTO: none
     ports:
       - "80:8080"
 

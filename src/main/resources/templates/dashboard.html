@@ -1,0 +1,108 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8" />
+    <title>Dashboard · Transaction Monitor</title>
+    <style>
+        body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial; padding: 24px; max-width: 1000px; margin: 0 auto; }
+        a { text-decoration: none; color: #111; }
+        .nav { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; }
+        .nav .spacer { flex: 1; }
+        .nav a { padding: 6px 10px; border-radius: 8px; }
+        .nav a.active { background: #111; color: #fff; }
+        .muted { color: #666; font-size: 13px; }
+        .tiles { display: flex; gap: 16px; flex-wrap: wrap; margin: 8px 0 24px; }
+        .tile { border: 1px solid #eee; border-radius: 12px; padding: 16px 20px; min-width: 160px; }
+        .tile .n { font-size: 32px; font-weight: 700; }
+        .tile .l { color: #666; font-size: 13px; margin-top: 4px; }
+        .tile.alert .n { color: #b00020; }
+        .card { border: 1px solid #eee; border-radius: 12px; padding: 16px 20px; margin: 12px 0; }
+        .bar-row { display: flex; align-items: center; gap: 12px; margin: 8px 0; }
+        .bar-row .label { width: 130px; font-size: 13px; }
+        .bar-row .track { flex: 1; background: #f2f2f2; border-radius: 999px; height: 14px; overflow: hidden; }
+        .bar-row .fill { height: 100%; background: #111; border-radius: 999px; }
+        .bar-row .fill.high { background: #b00020; }
+        .bar-row .fill.medium { background: #b26a00; }
+        .bar-row .fill.low { background: #2e7d32; }
+        .bar-row .count { width: 40px; text-align: right; font-size: 13px; }
+        table { border-collapse: collapse; width: 100%; }
+        th, td { border-bottom: 1px solid #eee; text-align: left; padding: 8px 10px; }
+        button { cursor: pointer; padding: 6px 10px; }
+    </style>
+</head>
+<body>
+<div class="nav">
+    <a href="/" class="active">Dashboard</a>
+    <a href="/alerts">Alerts</a>
+    <div class="spacer"></div>
+    <span class="muted">Signed in as <b sec:authentication="name">analyst</b></span>
+    <form th:action="@{/logout}" method="post" style="margin:0;">
+        <button type="submit">Log out</button>
+    </form>
+</div>
+
+<h1>Transaction Monitor</h1>
+<p class="muted">Operational overview</p>
+
+<div class="tiles">
+    <div class="tile">
+        <div class="n" th:text="${totalTransactions}">0</div>
+        <div class="l">Transactions ingested</div>
+    </div>
+    <div class="tile">
+        <div class="n" th:text="${totalAlerts}">0</div>
+        <div class="l">Alerts raised</div>
+    </div>
+    <div class="tile alert">
+        <div class="n" th:text="${openAlerts}">0</div>
+        <div class="l">Open alerts (need review)</div>
+    </div>
+</div>
+
+<div class="card">
+    <h3>Alerts by status</h3>
+    <div th:each="entry : ${byStatus}" class="bar-row">
+        <div class="label" th:text="${entry.key}">OPEN</div>
+        <div class="track">
+            <div class="fill"
+                 th:style="'width:' + (${totalAlerts > 0} ? ${entry.value} * 100 / ${totalAlerts} : 0) + '%'"></div>
+        </div>
+        <div class="count" th:text="${entry.value}">0</div>
+    </div>
+    <p class="muted" th:if="${totalAlerts == 0}">No alerts yet.</p>
+</div>
+
+<div class="card">
+    <h3>Risk distribution (all scored transactions)</h3>
+    <div th:each="entry : ${byRisk}" class="bar-row">
+        <div class="label" th:text="${entry.key}">HIGH</div>
+        <div class="track">
+            <div class="fill"
+                 th:classappend="${#strings.toLowerCase(entry.key.name())}"
+                 th:style="'width:' + (${totalTransactions > 0} ? ${entry.value} * 100 / ${totalTransactions} : 0) + '%'"></div>
+        </div>
+        <div class="count" th:text="${entry.value}">0</div>
+    </div>
+    <p class="muted" th:if="${totalTransactions == 0}">No transactions yet.</p>
+</div>
+
+<div class="card">
+    <h3>Recent alerts</h3>
+    <table>
+        <thead>
+        <tr><th>ID</th><th>Status</th><th>Risk</th><th>Score</th><th>Created</th></tr>
+        </thead>
+        <tbody>
+        <tr th:each="a : ${recentAlerts}">
+            <td><a th:href="@{'/alerts/' + ${a.id}}" th:text="${a.id}">1</a></td>
+            <td th:text="${a.status}">OPEN</td>
+            <td th:text="${a.riskScore.riskLevel}">HIGH</td>
+            <td th:text="${a.riskScore.score}">100</td>
+            <td th:text="${#temporals.format(a.createdAt, 'yyyy-MM-dd HH:mm:ss')}">time</td>
+        </tr>
+        <tr th:if="${recentAlerts.isEmpty()}"><td colspan="5" class="muted">No alerts yet.</td></tr>
+        </tbody>
+    </table>
+</div>
+</body>
+</html>

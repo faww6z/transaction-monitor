@@ -8,5 +8,15 @@ spring:
     password: apppass
   jpa:
     hibernate:
-      ddl-auto: update
+      # Flyway owns the schema now. Hibernate must not create or alter tables.
+      ddl-auto: none
     open-in-view: false
+  flyway:
+    enabled: true
+
+# Demo credentials for the analyst login and the ingest API.
+# Override in real deployments via APP_SECURITY_USERNAME / APP_SECURITY_PASSWORD.
+app:
+  security:
+    username: analyst
+    password: analyst

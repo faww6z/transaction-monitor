@@ -8,4 +8,8 @@ import java.util.List;
 
 public interface AlertRepository extends JpaRepository<Alert, Long> {
     List<Alert> findByStatusOrderByCreatedAtDesc(AlertStatus status);
+
+    long countByStatus(AlertStatus status);
+
+    List<Alert> findTop10ByOrderByCreatedAtDesc();
 }
