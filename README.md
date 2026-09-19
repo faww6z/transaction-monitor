@@ -124,13 +124,63 @@ push and pull request.
 
 ---
 
-## Possible future improvements
+## Roadmap
 
-- Asynchronous ingestion for higher throughput
-- Configurable / DB-driven risk rules
-- Role separation (dedicated ingest service account vs. analysts)
-- Metrics and monitoring (Actuator)
-- HTTPS with a custom domain
+Grouped roughly by payoff. The detection items come first: the engine currently
+scores every transaction in isolation, and that is the widest gap between this
+and a real monitoring system.
+
+**Detection**
+
+- **Give transactions an account identity.** They carry no sender or customer
+  reference today, so nothing can be correlated across time. This is the
+  keystone — most items below depend on it.
+- **Velocity and aggregation rules** over a rolling window per account. Without
+  them, structuring — splitting $50,000 into six $9,000 transfers to stay under
+  a reporting threshold — passes cleanly, because no single transaction looks
+  unusual.
+- **Behavioural baselines**, scoring deviation from an account's own history
+  instead of against fixed global thresholds.
+- **Watchlist and sanctions screening** on the counterparty.
+
+**Closing the feedback loop**
+
+- **Measure per-rule precision from analyst dispositions.** Every alert records
+  which rules fired and every review now records its outcome, so "BALANCE_MISMATCH
+  is 80% false positives" is one query away. That number should drive tuning.
+- **Alert-rate dashboards per rule**, so a bad threshold shows up within a day
+  rather than being discovered by a drowning analyst.
+
+**Configurable rules**
+
+- Lift thresholds out of `RiskConfig` into external configuration, then into the
+  database behind an admin screen.
+- **Version the rule set** and stamp each score with the version that produced
+  it, so a historical alert stays explainable after thresholds move. That is an
+  audit requirement, not a nicety.
+
+**Scale**
+
+- Paginate `/alerts`, index `status` and `created_at`, and resolve the N+1 on the
+  queue view.
+- Asynchronous ingestion via a queue, so scoring never blocks the caller.
+- Read endpoints on the API (`GET /api/transactions/{id}`, risk score lookup).
+
+**Analyst workflow**
+
+- **Cases** — group an account's related alerts into one investigation.
+- Bulk triage, plus queue ageing and SLA indicators.
+- Export a case file for regulatory reporting.
+
+**Quality and ops**
+
+- Testcontainers for integration tests, so `./mvnw verify` is self-contained
+  rather than depending on a CI service container.
+- **Mutation testing (PIT) on the risk package.** A green suite already missed a
+  live scoring bug once, because the test fixture shared an assumption with the
+  code under test; mutation coverage is what catches that class of blind spot.
+- Actuator metrics, structured logging, HTTPS on a custom domain, and secrets
+  moved out of `docker-compose.yml`.
 
 ---
 
